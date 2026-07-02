@@ -5,6 +5,14 @@ import { dashboardPath, safeNextPath } from "@/lib/auth";
 import { setSession, Role } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
 
+type AuthUserRow = {
+  id: string;
+  username: string;
+  role: Role;
+  full_name: string;
+  nim: string | null;
+};
+
 type LoginState = {
   error?: string;
 };
@@ -32,14 +40,14 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
     return { error: "Username atau password salah." };
   }
 
-  const role = data.role as Role;
+  const user = data as AuthUserRow;
   setSession({
-    userId: data.id,
-    username: data.username,
-    role,
-    name: data.full_name,
-    nim: data.nim
+    userId: user.id,
+    username: user.username,
+    role: user.role,
+    name: user.full_name,
+    nim: user.nim
   });
 
-  redirect(next || dashboardPath(role));
+  redirect(next || dashboardPath(user.role));
 }

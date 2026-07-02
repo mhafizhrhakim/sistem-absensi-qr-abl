@@ -5,6 +5,14 @@ import { dashboardPath } from "@/lib/auth";
 import { Role, setSession } from "@/lib/session";
 import { supabaseAdmin } from "@/lib/supabase";
 
+type AuthUserRow = {
+  id: string;
+  username: string;
+  role: Role;
+  full_name: string;
+  nim: string | null;
+};
+
 type RegisterState = {
   error?: string;
 };
@@ -18,7 +26,7 @@ export async function registerAction(_state: RegisterState, formData: FormData):
   const confirmPassword = String(formData.get("confirm_password") || "");
   const username = role === "mahasiswa" ? nim : usernameInput;
 
-  if (!['dosen', 'mahasiswa'].includes(role)) {
+  if (!["dosen", "mahasiswa"].includes(role)) {
     return { error: "Role tidak valid." };
   }
 
@@ -79,13 +87,14 @@ export async function registerAction(_state: RegisterState, formData: FormData):
     return { error: "Registrasi gagal. Coba ulangi." };
   }
 
+  const user = data as AuthUserRow;
   setSession({
-    userId: data.id,
-    username: data.username,
-    role: data.role as Role,
-    name: data.full_name,
-    nim: data.nim
+    userId: user.id,
+    username: user.username,
+    role: user.role,
+    name: user.full_name,
+    nim: user.nim
   });
 
-  redirect(dashboardPath(data.role as Role));
+  redirect(dashboardPath(user.role));
 }
